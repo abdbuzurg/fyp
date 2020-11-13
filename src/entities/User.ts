@@ -1,8 +1,9 @@
 import { Entity, PrimaryKey, Property, } from "@mikro-orm/core";
+import { Field, Int, ObjectType } from "type-graphql";
 
-
+@ObjectType()
 @Entity()
-export class User {
+export default class User {
 
   constructor(email: String, username: String, password: String, name: String, mobileNumber: String){
     this.email = email;
@@ -12,24 +13,31 @@ export class User {
     this.mobileNumber = mobileNumber;
   }
 
+  @Field(() => Int)
   @PrimaryKey()
   id!: number;
 
+  @Field(() => String)
   @Property()
   email!: String;
 
+  @Field(() => String)
   @Property()
   username!:String;
 
+  @Field(() => String)
   @Property()
   password!: String;
 
+  @Field(() => String)
   @Property()
   name!: String;
 
+  @Field(() => String)
   @Property({name: "mobile_number"})
   mobileNumber!: String;
 
+  @Field(() => Boolean)
   @Property({name: "super_user"})
   superUser: Boolean = false;
 

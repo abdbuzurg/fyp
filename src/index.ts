@@ -1,24 +1,25 @@
-import { MikroORM } from '@mikro-orm/core';
-import mikroConfig from './mikro-orm.config';
+import 'reflect-metadata';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql'
-import { HelloResolver } from './resolvers/HelloResolver';
+import UserResolver from './resolvers/UserResolver';
+import mikroOrmConfig from './mikro-orm.config';
+import { MikroORM } from '@mikro-orm/core'
 
 (async() => {
-  const orm = await MikroORM.init(mikroConfig);
-  //await orm.getMigrator().createMigration();
-  //await orm.getMigrator().up();
+  const orm = await MikroORM.init(mikroOrmConfig);
+  await orm.getMigrator().up();
 
   const app = express();
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver],
+      resolvers: [UserResolver],
       validate: false,
     }),
+    context: () => ({ entity: orm }),
   });
 
   apolloServer.applyMiddleware({ app });
   
-  app.listen(4000, () => console.log("Application starting at the port 4000 http://localhost:4000"));
+  app.listen(4000, () => console.log("Application starting at the port 4000 http://localhost:4000/graphql"));
 })();
