@@ -1,50 +1,57 @@
 import { MyContext } from 'src/types';
 import { Resolver, Query, Ctx, Int, Arg, Mutation } from 'type-graphql';
 import User from '../entities/User';
+import argon from 'argon2';
 
 @Resolver()
-export default class HelloResolver{
+export default class UserResolver{
   @Query(() => [User])
-  async users(@Ctx() { entity }: MyContext): Promise<User[]>{
-    return await entity.em.find(User, {});
+  async users(@Ctx() { entityManager }: MyContext): Promise<User[]>{
+    return await entityManager.find(User, { deletedAt: null});
   }
 
   @Query(() => User, { nullable: true })
-  async user(@Arg("id", () => Int) id: number, @Ctx() { entity }: MyContext) {
-    return await entity.em.findOne(User, { id });
+  async user(@Arg("id", () => Int) id: number, @Ctx() { entityManager }: MyContext) {
+    return await entityManager.findOne(User, { id });
   }
 
   @Mutation(() => User, { nullable: true }) 
-  async createUser(
-    @Arg("email") email: String,
-    @Arg("username") username: String,
-    @Arg("password") password: String,
-    @Arg("name") name: String,
-    @Arg("mobileNumber") mobileNumber: String,
-    @Ctx() { entity }: MyContext
+  async register(
+    @Arg("email") email: string,
+    @Arg("username") username: string,
+    @Arg("password") password: string,
+    @Arg("name") name: string,
+    @Arg("mobileNumber") mobileNumber: string,
+    @Ctx() { entityManager, knex }: MyContext
   ): Promise<User | null> {
-    const user = entity.em.create(User, {
+    const taken = await knex("user").where({ username }).orWhere({ mobile_number: mobileNumber }).orWhere({ email });
+    console.log(taken);
+    if (taken.length > 0){
+      return null;
+    }
+    const hashedPassword = await argon.hash(password);
+    const user = entityManager.create(User, {
       email,
       username,
-      password,
+      password: hashedPassword,
       name,
       mobileNumber,
     });
-    await entity.em.persistAndFlush(user);
+    await entityManager.persistAndFlush(user);
     return user;
   }
 
   @Mutation(() => User, { nullable: true }) 
   async updateUser(
     @Arg("id") id: number,
-    @Arg("email", { nullable: true}) email: String,
-    @Arg("username", { nullable: true}) username: String,
-    @Arg("password", { nullable: true}) password: String,
-    @Arg("name", { nullable: true}) name: String,
-    @Arg("mobileNumber", { nullable: true}) mobileNumber: String,
-    @Ctx() { entity }: MyContext
+    @Arg("email", { nullable: true}) email: string,
+    @Arg("username", { nullable: true}) username: string,
+    @Arg("password", { nullable: true}) password: string,
+    @Arg("name", { nullable: true}) name: string,
+    @Arg("mobileNumber", { nullable: true}) mobileNumber: string,
+    @Ctx() { entityManager }: MyContext
   ): Promise<User | null> {
-    const user = await entity.em.findOne(User, { id });
+    const user = await entityManager.findOne(User, { id });
     if (!user) {
       return null
     } 
@@ -56,21 +63,21 @@ export default class HelloResolver{
     if (typeof mobileNumber !== "undefined") user.mobileNumber = mobileNumber
 
     user.updatedAt = new Date();
-    await entity.em.persistAndFlush(user);
+    await entityManager.persistAndFlush(user);
     return user;
   }
 
   @Mutation(() => Boolean, { nullable: true }) 
   async deleteUser(
     @Arg("id") id: number,
-    @Ctx() { entity }: MyContext
+    @Ctx() { entityManager }: MyContext
   ): Promise<Boolean | null> {
-    const user = await entity.em.findOne(User, { id });
+    const user = await entityManager.findOne(User, { id });
     if (!user) {
       return null;
     }
     user.deletedAt = new Date();
-    await entity.em.persistAndFlush(user);
+    await entityManager.persistAndFlush(user);
     return true;
   }
 }
