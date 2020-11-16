@@ -9,6 +9,7 @@ import { AbstractSqlConnection } from '@mikro-orm/mysql';
 import redis from 'redis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
+import { COOKIE_NAME } from './constants';
 
 
 (async() => {
@@ -25,7 +26,7 @@ import connectRedis from 'connect-redis';
 
   app.use(
     session({
-      name: "qid",
+      name: COOKIE_NAME,
       store: new RedisStore({ 
         client: redisClient,
         disableTouch: true,

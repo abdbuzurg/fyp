@@ -2,6 +2,7 @@ import { MyContext } from 'src/types';
 import { Resolver, Query, Ctx, Int, Arg, Mutation } from 'type-graphql';
 import User from '../entities/User';
 import argon from 'argon2';
+import { COOKIE_NAME } from '../constants';
 
 @Resolver()
 export default class UserResolver{
@@ -64,33 +65,31 @@ export default class UserResolver{
 
   @Mutation(() => User, { nullable: true }) 
   async updateUser(
-    // @Arg("id", { nullable: true }) id: number,
-    // @Arg("email", { nullable: true}) email: string,
-    // @Arg("username", { nullable: true}) username: string,
-    // @Arg("password", { nullable: true}) password: string,
-    // @Arg("name", { nullable: true}) name: string,
-    // @Arg("mobileNumber", { nullable: true}) mobileNumber: string,
-    @Ctx() { request }: MyContext
+    //@Arg("id", { nullable: true }) id: number,  <-- need to be made for the cases if the SuperUser requests it.
+    @Arg("email", { nullable: true}) email: string,
+    @Arg("username", { nullable: true}) username: string,
+    @Arg("password", { nullable: true}) password: string,
+    @Arg("name", { nullable: true}) name: string,
+    @Arg("mobileNumber", { nullable: true}) mobileNumber: string,
+    @Ctx() { request, entityManager }: MyContext
   ): Promise<User | null> {
-    console.log(request.session);
-    return null;
-    // // if (response){
-    // //   return null;
-    // // }
-    // const user = await entityManager.findOne(User, { id });
-    // if (!user) {
-    //   return null
-    // } 
-    // if (typeof email !== "undefined") user.email = email
-    // if (typeof username !== "undefined") user.username = username
-    // if (typeof password !== "undefined") user.password = password
-    // if (typeof name !== "undefined") user.name = name
-    // if (typeof email !== "undefined") user.email = email
-    // if (typeof mobileNumber !== "undefined") user.mobileNumber = mobileNumber
+    if (typeof request.session.userId === "undefined"){
+      return null;
+    }
+    const user = await entityManager.findOne(User, { id: request.session.userId });
+    if (!user) {
+      return null
+    } 
+    if (typeof email !== "undefined") user.email = email
+    if (typeof username !== "undefined") user.username = username
+    if (typeof password !== "undefined") user.password = password
+    if (typeof name !== "undefined") user.name = name
+    if (typeof email !== "undefined") user.email = email
+    if (typeof mobileNumber !== "undefined") user.mobileNumber = mobileNumber
 
-    // user.updatedAt = new Date();
-    // await entityManager.persistAndFlush(user);
-    // return user;
+    user.updatedAt = new Date();
+    await entityManager.persistAndFlush(user);
+    return user;
   }
 
   @Mutation(() => Boolean, { nullable: true }) 
@@ -105,5 +104,19 @@ export default class UserResolver{
     user.deletedAt = new Date();
     await entityManager.persistAndFlush(user);
     return true;
+  }
+
+  @Mutation(() => Boolean, { nullable: true })
+  logout(@Ctx() {request, response}: MyContext){
+    return new Promise(resolve => 
+      request.session.destroy((error) => {
+        if (error) {
+          console.log(error);
+          resolve(false);
+        }
+
+        response.clearCookie(COOKIE_NAME);
+        resolve(true);
+    }));
   }
 }

@@ -5,6 +5,6 @@ import { Request, Response } from 'express';
 export type MyContext = {
   entityManager: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>;
   knex: Knex<any, unknown[]>;
-  request: Request & { session: { userId: Number}};
+  request: Request & { session: { userId: number}};
   response: Response;
 }
