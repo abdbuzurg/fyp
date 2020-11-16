@@ -5,7 +5,7 @@ import { Field, Int, ObjectType } from "type-graphql";
 @Entity()
 export default class User {
 
-  constructor(email: String, username: String, password: String, name: String, mobileNumber: String){
+  constructor(email: string, username: string, password: string, name: string, mobileNumber: string){
     this.email = email;
     this.username = username;
     this.password = password;
@@ -19,23 +19,23 @@ export default class User {
 
   @Field(() => String)
   @Property()
-  email!: String;
+  email!: string;
 
   @Field(() => String)
   @Property()
-  username!:String;
+  username!:string;
 
   @Field(() => String)
   @Property()
-  password!: String;
+  password!: string;
 
   @Field(() => String)
   @Property()
-  name!: String;
+  name!: string;
 
   @Field(() => String)
   @Property({name: "mobile_number"})
-  mobileNumber!: String;
+  mobileNumber!: string;
 
   @Field(() => Boolean)
   @Property({name: "super_user"})

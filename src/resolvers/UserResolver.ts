@@ -24,8 +24,8 @@ export default class UserResolver{
     @Arg("mobileNumber") mobileNumber: string,
     @Ctx() { entityManager, knex }: MyContext
   ): Promise<User | null> {
+    //checking if the giver USERNAME, EMAIL and MOBILE_NUMBR are taken already
     const taken = await knex("user").where({ username }).orWhere({ mobile_number: mobileNumber }).orWhere({ email });
-    console.log(taken);
     if (taken.length > 0){
       return null;
     }
@@ -41,30 +41,56 @@ export default class UserResolver{
     return user;
   }
 
+  @Query(() => Boolean, { nullable: true })
+  async login(
+    @Arg("email", { nullable: true }) email: string,
+    @Arg("username", { nullable: true }) username: string,
+    @Arg("password") password: string,
+    @Ctx() { entityManager, request }: MyContext
+  ):Promise<Boolean | null> {
+    let user: User | null;
+    if (typeof email !== "undefined") {
+      user = await entityManager.findOne(User, { email, deletedAt: null, });;
+    } else if (typeof username !== "undefined") {
+      user = await entityManager.findOne(User, { username, deletedAt: null, });
+    } else {
+      return null;
+    }
+    if (!user) return null;
+    if (!await argon.verify(user.password, password)) return null;
+    request.session.userId = user.id;
+    return true;
+  }
+
   @Mutation(() => User, { nullable: true }) 
   async updateUser(
-    @Arg("id") id: number,
-    @Arg("email", { nullable: true}) email: string,
-    @Arg("username", { nullable: true}) username: string,
-    @Arg("password", { nullable: true}) password: string,
-    @Arg("name", { nullable: true}) name: string,
-    @Arg("mobileNumber", { nullable: true}) mobileNumber: string,
-    @Ctx() { entityManager }: MyContext
+    // @Arg("id", { nullable: true }) id: number,
+    // @Arg("email", { nullable: true}) email: string,
+    // @Arg("username", { nullable: true}) username: string,
+    // @Arg("password", { nullable: true}) password: string,
+    // @Arg("name", { nullable: true}) name: string,
+    // @Arg("mobileNumber", { nullable: true}) mobileNumber: string,
+    @Ctx() { request }: MyContext
   ): Promise<User | null> {
-    const user = await entityManager.findOne(User, { id });
-    if (!user) {
-      return null
-    } 
-    if (typeof email !== "undefined") user.email = email
-    if (typeof username !== "undefined") user.username = username
-    if (typeof password !== "undefined") user.password = password
-    if (typeof name !== "undefined") user.name = name
-    if (typeof email !== "undefined") user.email = email
-    if (typeof mobileNumber !== "undefined") user.mobileNumber = mobileNumber
+    console.log(request.session);
+    return null;
+    // // if (response){
+    // //   return null;
+    // // }
+    // const user = await entityManager.findOne(User, { id });
+    // if (!user) {
+    //   return null
+    // } 
+    // if (typeof email !== "undefined") user.email = email
+    // if (typeof username !== "undefined") user.username = username
+    // if (typeof password !== "undefined") user.password = password
+    // if (typeof name !== "undefined") user.name = name
+    // if (typeof email !== "undefined") user.email = email
+    // if (typeof mobileNumber !== "undefined") user.mobileNumber = mobileNumber
 
-    user.updatedAt = new Date();
-    await entityManager.persistAndFlush(user);
-    return user;
+    // user.updatedAt = new Date();
+    // await entityManager.persistAndFlush(user);
+    // return user;
   }
 
   @Mutation(() => Boolean, { nullable: true }) 
