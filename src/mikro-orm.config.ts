@@ -2,9 +2,10 @@ import { MikroORM } from '@mikro-orm/core'
 import path from "path";
 import User from './entities/User'; 
 import { DB_NAME, DB_PASSWORD, DB_USERNAME, __production__ } from './constants';
+import DriverFeed from './entities/DriverFeed';
 
 export default {
-  entities: [User],
+  entities: [User, DriverFeed],
   migrations: {
     path: path.join(__dirname, './migrations'), 
     pattern: /^[\w-]+\d+\.[tj]s$/, 

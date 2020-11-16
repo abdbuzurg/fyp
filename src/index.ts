@@ -10,6 +10,8 @@ import redis from 'redis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
 import { COOKIE_NAME } from './constants';
+import FeedResolver from './resolvers/FeedResolvers';
+import DriverFeedResolver from './resolvers/DriverFeedResolver';
 
 
 (async() => {
@@ -44,7 +46,7 @@ import { COOKIE_NAME } from './constants';
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver],
+      resolvers: [UserResolver, FeedResolver, DriverFeedResolver],
       validate: false,
     }),
     context: ({ req, res }) => ({ 
