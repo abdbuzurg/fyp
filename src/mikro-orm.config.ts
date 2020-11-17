@@ -3,9 +3,11 @@ import path from "path";
 import User from './entities/User'; 
 import { DB_NAME, DB_PASSWORD, DB_USERNAME, __production__ } from './constants';
 import DriverFeed from './entities/DriverFeed';
+import ClientFeed from './entities/ClientFeed';
+import RequestTable from './entities/RequestTable';
 
 export default {
-  entities: [User, DriverFeed],
+  entities: [User, DriverFeed, ClientFeed, RequestTable],
   migrations: {
     path: path.join(__dirname, './migrations'), 
     pattern: /^[\w-]+\d+\.[tj]s$/, 

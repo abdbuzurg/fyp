@@ -1,11 +1,13 @@
 import DriverFeed from "../entities/DriverFeed";
 import User from "../entities/User";
 import { MyContext } from "../types";
-import { Ctx, FieldResolver, Resolver, Root } from "type-graphql";
+import { Ctx, FieldResolver, Resolver, Root, UseMiddleware } from "type-graphql";
+import { isAuth } from "../middleware/isAuth";
 
 @Resolver(of => DriverFeed)
 export default class DriverFeedResolver{
   
+  @UseMiddleware(isAuth)
   @FieldResolver(() => User)
   async client(
     @Root() { client }: DriverFeed,
@@ -14,5 +16,4 @@ export default class DriverFeedResolver{
     const user = await entityManager.findOne(User, client);
     return user;
   }
-
 }

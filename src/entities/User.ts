@@ -1,5 +1,9 @@
-import { Entity, PrimaryKey, Property, } from "@mikro-orm/core";
+import { Collection, Entity, OneToMany, PrimaryKey, Property, } from "@mikro-orm/core";
 import { Field, Int, ObjectType } from "type-graphql";
+import DriverFeed from "./DriverFeed";
+import ClientFeed from "./ClientFeed";
+import RequestTable from "./RequestTable";
+// import RequestTable from "./RequestTable";
 
 @ObjectType()
 @Entity()
@@ -49,4 +53,18 @@ export default class User {
 
   @Property({type: "date", name: "deleted_at", nullable: true})
   deletedAt: Date;
+
+  //------------------------ FOR RELATIONS -------------------------------//
+
+  @OneToMany(() => ClientFeed, clientFeed => clientFeed.driver, { mappedBy: "driver" } )
+  clientFeed = new Collection<ClientFeed>(this);
+
+  @OneToMany(() => DriverFeed, driverFeed => driverFeed.client, { mappedBy: "client" })
+  driverFeed = new Collection<DriverFeed>(this);
+
+  @OneToMany(() => RequestTable, requestTable => requestTable.sender, { mappedBy: "sender" })
+  requestTableSender = new Collection<RequestTable>(this);
+
+  @OneToMany(() => RequestTable, requestTable => requestTable.reciever, { mappedBy: "reciever" })
+  requestTableReciever = new Collection<RequestTable>(this);
 }
