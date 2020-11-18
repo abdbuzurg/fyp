@@ -1,25 +1,31 @@
 import { Collection, Entity, ManyToMany, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Field, Float, Int, ObjectType } from "type-graphql";
 import RequestTable from "./RequestTable";
 import User from "./User";
 
+@ObjectType()
 @Entity({ tableName: "driver_feed" })
 export default class DriverFeed {
+  @Field(() => Int)
   @PrimaryKey()
   id!: number;
 
+  @Field(() => String)
   @Property()
   destination: string;
 
+  @Field(() => Float)
   @Property()
   pricing: number;
 
+  @Field(() => String)
   @Property({ name: "departure_date"})
   departureDate: string;
 
   @ManyToOne("User")
   client: User;
 
-  @ManyToMany(() => RequestTable, "driverFeedRequest", { owner: true })
+  @ManyToMany(() => RequestTable, "driverFeedRequest", { owner: true, nullable: true })
   request = new Collection<RequestTable>(this);
 
   @Property({type: "date", name: "created_at"})

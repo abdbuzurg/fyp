@@ -28,7 +28,7 @@ export default class ClientFeed {
   @Property({ name: "departure_date" })
   departureDate: string;
 
-  @ManyToMany(() => RequestTable, "clientFeedRequest", { owner: true })
+  @ManyToMany(() => RequestTable, "clientFeedRequest", { owner: true, nullable: true })
   request = new Collection<RequestTable>(this);
 
   @Property({type: "date", name: "created_at"})

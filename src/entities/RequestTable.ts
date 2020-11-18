@@ -1,11 +1,13 @@
 import { Collection, Entity, ManyToMany, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Field, Int, ObjectType } from "type-graphql";
 import ClientFeed from "./ClientFeed";
 import DriverFeed from "./DriverFeed";
 import User from "./User";
 
+@ObjectType()
 @Entity({ tableName: "request" })
 export default class RequestTable{
-  
+  @Field(() => Int)
   @PrimaryKey()
   id!: number;
 
@@ -15,12 +17,15 @@ export default class RequestTable{
   @ManyToOne("User")
   reciever: User;
 
+  @Field(() => Int)
   @Property({ name: "feed_type" })
-  feedType: WhoToWhom;
-  
+  feedType: FeedType;
+
+  @Field(() => Int)
   @Property({ name: "request_status" })
   requestStatus: Status;
   
+  @Field(() => Int)
   @Property({ name: "response_status" })
   responseStatus: Status;
 
@@ -40,9 +45,9 @@ export default class RequestTable{
   deletedAt: Date;
 }
 
-enum WhoToWhom {
-  CLIENT_TO_DRIVER,
-  DRIVER_TO_CLIENT
+enum FeedType {
+  DriverFeed,
+  ClientFeed
 }
 
 enum Status {

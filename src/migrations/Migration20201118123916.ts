@@ -1,9 +1,11 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20201117193314 extends Migration {
+export class Migration20201118123916 extends Migration {
 
   async up(): Promise<void> {
-    this.addSql('create table `driver_feed` (`id` int unsigned not null auto_increment primary key, `destinaton` varchar(255) not null, `pricing` int(11) not null, `departure_date` varchar(255) not null, `client_id` int(11) unsigned not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');
+    this.addSql('create table `user` (`id` int unsigned not null auto_increment primary key, `email` varchar(255) not null, `username` varchar(255) not null, `password` varchar(255) not null, `name` varchar(255) not null, `mobile_number` varchar(255) not null, `super_user` tinyint(1) not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');
+
+    this.addSql('create table `driver_feed` (`id` int unsigned not null auto_increment primary key, `destination` varchar(255) not null, `pricing` int(11) not null, `departure_date` varchar(255) not null, `client_id` int(11) unsigned not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');
     this.addSql('alter table `driver_feed` add index `driver_feed_client_id_index`(`client_id`);');
 
     this.addSql('create table `client_feed` (`id` int unsigned not null auto_increment primary key, `driver_id` int(11) unsigned not null, `destination` varchar(255) not null, `pricing` int(11) not null, `car_model` varchar(255) not null, `number_of_seats` int(11) not null, `arrival_time` varchar(255) not null, `departure_date` varchar(255) not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');
