@@ -54,33 +54,43 @@ export default class FeedResolver{
   }
 
   @UseMiddleware(isAuth)
-  @Mutation(() => RequestTable)
+  @Mutation(() => RequestTable, { nullable: true })
   async createRequest(
     @Arg("feedId") feedId: number,
     @Arg("feedType") feedType: number,
     @Ctx() { entityManager, request }: MyContext
-  ): Promise<Boolean | null>{
-    const driverFeed = await entityManager.findOne(DriverFeed, feedId);
-    const clientFeed = await entityManager.findOne(ClientFeed, feedId);
+  ): Promise<RequestTable | null>{
+    const driverFeed = await entityManager.findOne(DriverFeed, feedId, { fields: ["client"]});
+    const clientFeed = await entityManager.findOne(ClientFeed, feedId, { fields: ['driver']});
+    console.log(driverFeed !== null, clientFeed !== null);
 
     let reciever: number;
-    if (!driverFeed){
+    if (driverFeed !== null){
       reciever = driverFeed!.client.id;
-    } if (!clientFeed) {
+    } else if (clientFeed !== null) {
       reciever = clientFeed!.driver.id;
     } else {
-      return false;
+      return null;
     }
 
+    console.log(reciever);
     const requestTable = entityManager.create(RequestTable, {
       sender: request.session.userId,
       reciever,
       feedType,
       requestStatus: 1,
       responseStatus: 1
-    });
-
+    });   
     await entityManager.persistAndFlush(requestTable);
-    return true;
+
+    if (feedType == 0) {
+      driverFeed?.request.add(requestTable);
+      await entityManager.persistAndFlush(driverFeed!);
+    } else {
+      clientFeed?.request.add(requestTable);
+      await entityManager.persistAndFlush(clientFeed!);
+    }
+
+    return requestTable;
   }
 }

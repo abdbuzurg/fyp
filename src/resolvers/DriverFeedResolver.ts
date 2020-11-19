@@ -18,13 +18,11 @@ export default class DriverFeedResolver{
   }
 
   @UseMiddleware(isAuth)
-  @FieldResolver(() => [RequestTable])
+  @FieldResolver(() => [RequestTable], { nullable: true })
   async request(
     @Root() { request }: DriverFeed,
-    @Ctx() { entityManager }: MyContext
   ): Promise<RequestTable[] | null> {
-    const requests = await request.init();
-    console.log(requests);
-    return null;
+    await request.init();
+    return request.getItems();
   }
 }
