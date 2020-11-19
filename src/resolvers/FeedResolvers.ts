@@ -31,6 +31,7 @@ export default class FeedResolver{
     return driverFeed;
   }
 
+  @UseMiddleware(isAuth)
   @Mutation(() => DriverFeed, { nullable: true})
   async updateDriverFeed(
     @Arg("id") id: number,
@@ -51,6 +52,82 @@ export default class FeedResolver{
     driverFeedPost.updatedAt = new Date();
     await entityManager.persistAndFlush(driverFeedPost);
     return driverFeedPost;
+  }
+
+  @UseMiddleware(isAuth)
+  @Mutation(() => Boolean)
+  async deleteDriverFeed(
+    @Arg("id") id: number,
+    @Ctx() { entityManager }: MyContext
+  ): Promise<Boolean> {
+    const driverFeed = await entityManager.findOne(DriverFeed, id);
+    driverFeed!.deletedAt = new Date();
+    await entityManager.persistAndFlush(driverFeed!);
+    return true;
+  }
+
+  @UseMiddleware(isAuth)
+  @Mutation(() => ClientFeed, { nullable: true })
+  async createClientFeed(
+    @Arg("destination") destination: string,
+    @Arg("pricing") pricing: number,
+    @Arg("carModel") carModel: string,
+    @Arg("numberOfSeats") numberOfSeats: number,
+    @Arg("arrivalTime") arrivalTime: string,
+    @Arg("departureDate") departureDate: string,
+    @Ctx() { entityManager, request }: MyContext
+  ): Promise<ClientFeed | null>{
+    const clientFeed = entityManager.create(ClientFeed, {
+      driver: request.session.userId,
+      destination,
+      pricing,
+      carModel,
+      numberOfSeats,
+      arrivalTime,
+      departureDate
+    });
+
+    await entityManager.persistAndFlush(clientFeed);
+    return clientFeed;
+  }
+
+  @UseMiddleware(isAuth)
+  @Mutation(() => ClientFeed, { nullable: true })
+  async updateClientFeed(
+    @Arg("id") id: number,
+    @Arg("destination", { nullable: true }) destination: string,
+    @Arg("pricing", { nullable: true }) pricing: number,
+    @Arg("carModel", { nullable: true }) carModel: string,
+    @Arg("numberOfSeats", { nullable: true }) numberOfSeats: number,
+    @Arg("arrivalTime", { nullable: true }) arrivalTime: string,
+    @Arg("departureDate", { nullable: true }) departureDate: string,
+    @Ctx() { entityManager, request }: MyContext
+  ): Promise<ClientFeed | null>{
+    const clientFeed = await entityManager.findOne(ClientFeed, id);
+
+    if (!clientFeed) return null;
+    if (typeof destination !== "undefined") clientFeed.destination = destination;
+    if (typeof pricing !== "undefined") clientFeed.pricing = pricing;
+    if (typeof carModel !== "undefined") clientFeed.carModel = carModel;
+    if (typeof numberOfSeats !== "undefined") clientFeed.numberOfSeats = numberOfSeats;
+    if (typeof arrivalTime !== "undefined") clientFeed.arrivalTime = arrivalTime;
+    if (typeof departureDate !== "undefined") clientFeed.departureDate = departureDate;
+
+    clientFeed.updatedAt = new Date();
+    await entityManager.persistAndFlush(clientFeed);
+    return clientFeed;
+  }
+
+  @UseMiddleware(isAuth)
+  @Mutation(() => Boolean)
+  async deleteClientFeed(
+    @Arg("id") id: number,
+    @Ctx() { entityManager }: MyContext
+  ): Promise<Boolean> {
+    const clientFeed = await entityManager.findOne(ClientFeed, id);
+    clientFeed!.deletedAt = new Date();
+    await entityManager.persistAndFlush(clientFeed!);
+    return true;
   }
 
   @UseMiddleware(isAuth)
