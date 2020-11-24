@@ -14,7 +14,7 @@ export default {
   },
   dbName: DB_NAME,
   type: "mysql",
-  clientUrl: "mysql://host.docker.internal:3306",
+  clientUrl: "mysql://localhost:3306",
   password: DB_PASSWORD,
   user: DB_USERNAME,
   debug: __production__,
