@@ -13,7 +13,7 @@ import { COOKIE_NAME } from './constants';
 import FeedResolver from './resolvers/FeedResolvers';
 import DriverFeedResolver from './resolvers/DriverFeedResolver';
 import RequestResolver from './resolvers/RequestResolver';
-import { userLoader } from './utils/UserLoader';
+import { userLoader } from './utils/userLoader';
 
 
 (async() => {

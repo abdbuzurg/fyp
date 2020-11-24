@@ -1,7 +1,7 @@
 import { Connection, EntityManager, IDatabaseDriver} from "@mikro-orm/core";
 import { Knex } from "@mikro-orm/mysql";
 import { Request, Response } from 'express';
-import { userLoader } from "./utils/UserLoader";
+import { userLoader } from "./utils/userLoader";
 
 export type MyContext = {
   entityManager: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>;
