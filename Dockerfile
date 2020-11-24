@@ -12,5 +12,6 @@ COPY . .
 RUN yarn build
 
 EXPOSE 4000
+CMD ["npm", "run", "migration:create"]
 CMD ["node", "dist/index.js"]
 USER node
