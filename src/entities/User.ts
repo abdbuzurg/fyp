@@ -65,6 +65,6 @@ export default class User {
   @OneToMany(() => RequestTable, requestTable => requestTable.sender, { mappedBy: "sender" })
   requestTableSender = new Collection<RequestTable>(this);
 
-  @OneToMany(() => RequestTable, requestTable => requestTable.reciever, { mappedBy: "reciever" })
+  @OneToMany(() => RequestTable, requestTable => requestTable.receiver, { mappedBy: "receiver" })
   requestTableReciever = new Collection<RequestTable>(this);
 }

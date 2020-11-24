@@ -11,17 +11,17 @@ export default class RequestResolver{
   @FieldResolver(() => User)
   async sender(
     @Root() { sender }: RequestTable,
-    @Ctx() { entityManager}: MyContext
+    @Ctx() { userLoader}: MyContext
   ): Promise<User | null>{
-    return await entityManager.findOne(User, sender);
+    return userLoader.load(sender.id);
   }
 
   @UseMiddleware(isAuth)
   @FieldResolver(() => User)
   async reciever(
-    @Root() { reciever }: RequestTable,
-    @Ctx() { entityManager}: MyContext
+    @Root() { receiver }: RequestTable,
+    @Ctx() { userLoader}: MyContext
   ): Promise<User | null>{
-    return await entityManager.findOne(User, reciever);
+    return userLoader.load(receiver.id);
   }
 }

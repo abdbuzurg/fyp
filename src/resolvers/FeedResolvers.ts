@@ -139,21 +139,19 @@ export default class FeedResolver{
   ): Promise<RequestTable | null>{
     const driverFeed = await entityManager.findOne(DriverFeed, feedId, { fields: ["client"]});
     const clientFeed = await entityManager.findOne(ClientFeed, feedId, { fields: ['driver']});
-    console.log(driverFeed !== null, clientFeed !== null);
 
-    let reciever: number;
+    let receiver: number;
     if (driverFeed !== null){
-      reciever = driverFeed!.client.id;
+      receiver = driverFeed!.client.id;
     } else if (clientFeed !== null) {
-      reciever = clientFeed!.driver.id;
+      receiver = clientFeed!.driver.id;
     } else {
       return null;
     }
 
-    console.log(reciever);
     const requestTable = entityManager.create(RequestTable, {
       sender: request.session.userId,
-      reciever,
+      receiver,
       feedType,
       requestStatus: 1,
       responseStatus: 1

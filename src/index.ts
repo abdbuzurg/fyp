@@ -13,6 +13,7 @@ import { COOKIE_NAME } from './constants';
 import FeedResolver from './resolvers/FeedResolvers';
 import DriverFeedResolver from './resolvers/DriverFeedResolver';
 import RequestResolver from './resolvers/RequestResolver';
+import { userLoader } from './utils/UserLoader';
 
 
 (async() => {
@@ -54,7 +55,8 @@ import RequestResolver from './resolvers/RequestResolver';
       entityManager, 
       knex,
       request: req,
-      response: res
+      response: res,
+      userLoader: userLoader({ entityManager })
     }),
   });
 

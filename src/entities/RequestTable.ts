@@ -15,7 +15,7 @@ export default class RequestTable{
   sender: User
 
   @ManyToOne("User")
-  reciever: User;
+  receiver: User;
 
   @Field(() => Int)
   @Property({ name: "feed_type" })

@@ -12,9 +12,9 @@ export default class DriverFeedResolver{
   @FieldResolver(() => User)
   async client(
     @Root() { client }: DriverFeed,
-    @Ctx() { entityManager }: MyContext
-  ): Promise<User | null>{
-    return await entityManager.findOne(User, client);
+    @Ctx() { userLoader }: MyContext
+  ): Promise<User | null>{  
+    return userLoader.load(client.id);
   }
 
   @UseMiddleware(isAuth)
