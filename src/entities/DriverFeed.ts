@@ -11,8 +11,12 @@ export default class DriverFeed {
   id!: number;
 
   @Field(() => String)
-  @Property()
-  destination: string;
+  @Property({ name: "initial_location"})
+  initialLocation: string;
+  
+  @Field(() => String)
+  @Property({ name: "final_location"})
+  finalLocation: string;
 
   @Field(() => Float)
   @Property()
@@ -21,6 +25,10 @@ export default class DriverFeed {
   @Field(() => String)
   @Property({ name: "departure_date"})
   departureDate: string;
+  
+  @Field(() => String)
+  @Property()
+  description: string;
 
   @ManyToOne("User")
   client: User;

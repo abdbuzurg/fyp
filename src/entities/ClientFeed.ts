@@ -6,6 +6,7 @@ import User from "./User";
 @ObjectType()
 @Entity({ tableName: "client_feed" })
 export default class ClientFeed {
+  @Field()
   @PrimaryKey()
   id!: number;
 
@@ -13,8 +14,12 @@ export default class ClientFeed {
   driver: User;
 
   @Field()
-  @Property()
-  destination: string;
+  @Property({ name: "initial_location" })
+  initialLocation: string;
+  
+  @Field()
+  @Property({ name: "final_location"})
+  finalLocation: string;
 
   @Field()
   @Property()
@@ -29,12 +34,12 @@ export default class ClientFeed {
   numberOfSeats: number;
   
   @Field()
-  @Property({ name: "arrival_time" })
-  arrivalTime: string;
-
-  @Field()
   @Property({ name: "departure_date" })
   departureDate: string;
+
+  @Field()
+  @Property()
+  description: String
 
   @ManyToMany(() => RequestTable, "clientFeedRequest", { owner: true, nullable: true })
   request = new Collection<RequestTable>(this);

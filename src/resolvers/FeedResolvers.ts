@@ -5,25 +5,39 @@ import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from "type-graphql
 import RequestTable from "../entities/RequestTable";
 import ClientFeed from "../entities/ClientFeed";
 
-@Resolver(of => DriverFeed)
+@Resolver()
 export default class FeedResolver{
-  
+
+  @UseMiddleware(isAuth)
   @Query(() => [DriverFeed])
   async fetchDriverFeed(@Ctx() { entityManager }: MyContext): Promise<DriverFeed[] | null> {
     return await entityManager.find(DriverFeed, {});
   }
 
+  @UseMiddleware(isAuth)
+  @Query(() => [DriverFeed])
+  async fetchDriverFeedById(
+    @Arg("id") id: number,
+    @Ctx() { entityManager }: MyContext
+  ): Promise<DriverFeed | null> {
+    return await entityManager.findOne(DriverFeed, id);
+  }
+
   @Mutation(() => DriverFeed, { nullable: true })
   @UseMiddleware(isAuth)
   async createDriverFeed(
-    @Arg("destination") destination: string,
+    @Arg("initialLocation") initialLocation: string,
+    @Arg("finalLocation") finalLocation: string,
     @Arg("pricing") pricing: number,
+    @Arg("description") description: string,
     @Arg("departureDate") departureDate: string,
     @Ctx() { entityManager, request }: MyContext
   ){
     const driverFeed = entityManager.create(DriverFeed, {
       client: request.session.userId,
-      destination,
+      description,
+      initialLocation,
+      finalLocation,
       pricing,
       departureDate,
     });
@@ -35,8 +49,10 @@ export default class FeedResolver{
   @Mutation(() => DriverFeed, { nullable: true})
   async updateDriverFeed(
     @Arg("id") id: number,
-    @Arg("destination", { nullable: true }) destination: string,
+    @Arg("initialLocation", { nullable: true }) initialLocation: string,
+    @Arg("finalLocation", { nullable: true }) finalLocation: string,
     @Arg("pricing", { nullable: true }) pricing: number,
+    @Arg("description", { nullable: true }) description: string,
     @Arg("departureDate", { nullable: true }) departureDate: string,
     @Ctx() { entityManager, request }: MyContext
   ): Promise<DriverFeed | null> {
@@ -45,7 +61,9 @@ export default class FeedResolver{
     if (!driverFeedPost) return null;
     if (driverFeedPost.client.id !== request.session.userId) return null;
 
-    if (typeof destination !== "undefined") driverFeedPost.destination = destination;
+    if (typeof description !== "undefined") driverFeedPost.description = description;
+    if (typeof initialLocation !== "undefined") driverFeedPost.initialLocation = initialLocation;
+    if (typeof finalLocation !== "undefined") driverFeedPost.finalLocation = finalLocation;
     if (typeof pricing !== "undefined") driverFeedPost.pricing = pricing;
     if (typeof departureDate !== "undefined") driverFeedPost.departureDate = departureDate;
 
@@ -67,23 +85,40 @@ export default class FeedResolver{
   }
 
   @UseMiddleware(isAuth)
+  @Query(() => [ClientFeed])
+  async fetchClientFeed(@Ctx() { entityManager }: MyContext): Promise<ClientFeed[] | null>{
+    return await entityManager.find(ClientFeed, {});
+  }
+
+  @UseMiddleware(isAuth)
+  @Query(() => ClientFeed)
+  async fetchClientFeedById(
+    @Arg("id") id: number,
+    @Ctx() { entityManager }: MyContext
+  ): Promise<ClientFeed| null>{
+    return await entityManager.findOne(ClientFeed, id);
+  }
+
+  @UseMiddleware(isAuth)
   @Mutation(() => ClientFeed, { nullable: true })
   async createClientFeed(
-    @Arg("destination") destination: string,
+    @Arg("initialLocation") initialLocation: string,
+    @Arg("finalLocation") finalLocation: string,
     @Arg("pricing") pricing: number,
     @Arg("carModel") carModel: string,
     @Arg("numberOfSeats") numberOfSeats: number,
-    @Arg("arrivalTime") arrivalTime: string,
+    @Arg("description") description: string,
     @Arg("departureDate") departureDate: string,
     @Ctx() { entityManager, request }: MyContext
   ): Promise<ClientFeed | null>{
     const clientFeed = entityManager.create(ClientFeed, {
       driver: request.session.userId,
-      destination,
+      description,
+      initialLocation,
+      finalLocation,
       pricing,
       carModel,
       numberOfSeats,
-      arrivalTime,
       departureDate
     });
 
@@ -95,22 +130,23 @@ export default class FeedResolver{
   @Mutation(() => ClientFeed, { nullable: true })
   async updateClientFeed(
     @Arg("id") id: number,
-    @Arg("destination", { nullable: true }) destination: string,
+    @Arg("initialLocation", { nullable: true }) initialLocation: string,
+    @Arg("finalLocation", { nullable: true }) finalLocation: string,
     @Arg("pricing", { nullable: true }) pricing: number,
     @Arg("carModel", { nullable: true }) carModel: string,
     @Arg("numberOfSeats", { nullable: true }) numberOfSeats: number,
-    @Arg("arrivalTime", { nullable: true }) arrivalTime: string,
+    @Arg("description", { nullable: true }) description: string,
     @Arg("departureDate", { nullable: true }) departureDate: string,
     @Ctx() { entityManager, request }: MyContext
   ): Promise<ClientFeed | null>{
     const clientFeed = await entityManager.findOne(ClientFeed, id);
 
     if (!clientFeed) return null;
-    if (typeof destination !== "undefined") clientFeed.destination = destination;
-    if (typeof pricing !== "undefined") clientFeed.pricing = pricing;
+    if (typeof description !== "undefined") clientFeed.description = description;
+    if (typeof initialLocation !== "undefined") clientFeed.initialLocation = initialLocation;
+    if (typeof finalLocation !== "undefined") clientFeed.finalLocation = finalLocation;
     if (typeof carModel !== "undefined") clientFeed.carModel = carModel;
     if (typeof numberOfSeats !== "undefined") clientFeed.numberOfSeats = numberOfSeats;
-    if (typeof arrivalTime !== "undefined") clientFeed.arrivalTime = arrivalTime;
     if (typeof departureDate !== "undefined") clientFeed.departureDate = departureDate;
 
     clientFeed.updatedAt = new Date();

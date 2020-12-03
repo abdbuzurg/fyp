@@ -14,6 +14,8 @@ import FeedResolver from './resolvers/FeedResolvers';
 import DriverFeedResolver from './resolvers/DriverFeedResolver';
 import RequestResolver from './resolvers/RequestResolver';
 import { userLoader } from './utils/userLoader';
+import cors from "cors";
+import ClientFeedResolver from './resolvers/ClientFeedResolver';
 
 
 (async() => {
@@ -27,6 +29,13 @@ import { userLoader } from './utils/userLoader';
 
   const RedisStore = connectRedis(session);
   const redisClient = redis.createClient();
+  app.set("trust proxy", 1);
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN,
+      credentials: true,
+    })
+  );
 
   app.use(
     session({
@@ -48,7 +57,7 @@ import { userLoader } from './utils/userLoader';
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, FeedResolver, DriverFeedResolver, RequestResolver],
+      resolvers: [UserResolver, FeedResolver, DriverFeedResolver, ClientFeedResolver, RequestResolver],
       validate: false,
     }),
     context: ({ req, res }) => ({ 
@@ -60,7 +69,7 @@ import { userLoader } from './utils/userLoader';
     }),
   });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, cors: false });
   
   app.listen(4000, () => console.log("Application starting at the port 4000 http://localhost:4000/graphql"));
 })();

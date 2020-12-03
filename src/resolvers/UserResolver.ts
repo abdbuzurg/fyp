@@ -42,7 +42,7 @@ export default class UserResolver{
     return user;
   }
 
-  @Query(() => Boolean, { nullable: true })
+  @Mutation(() => Boolean, { nullable: true })
   async login(
     @Arg("email", { nullable: true }) email: string,
     @Arg("username", { nullable: true }) username: string,
