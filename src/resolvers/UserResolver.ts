@@ -1,8 +1,9 @@
-import { MyContext } from 'src/types';
-import { Resolver, Query, Ctx, Int, Arg, Mutation } from 'type-graphql';
+import { MyContext } from '../types';
+import { Resolver, Query, Ctx, Int, Arg, Mutation, ObjectType, Field } from 'type-graphql';
 import User from '../entities/User';
 import argon from 'argon2';
 import { COOKIE_NAME } from '../constants';
+import { createAccessToken, createRefreshToken } from '../utils/auth';
 
 @Resolver()
 export default class UserResolver{
@@ -42,25 +43,25 @@ export default class UserResolver{
     return user;
   }
 
-  @Mutation(() => Boolean, { nullable: true })
+  @Mutation(() => LoginResponse, { nullable: true })
   async login(
-    @Arg("email", { nullable: true }) email: string,
-    @Arg("username", { nullable: true }) username: string,
+    @Arg("username") username: string,
     @Arg("password") password: string,
-    @Ctx() { entityManager, request }: MyContext
-  ):Promise<Boolean | null> {
-    let user: User | null;
-    if (typeof email !== "undefined") {
-      user = await entityManager.findOne(User, { email, deletedAt: null, });;
-    } else if (typeof username !== "undefined") {
-      user = await entityManager.findOne(User, { username, deletedAt: null, });
-    } else {
-      return null;
+    @Ctx() { entityManager, response }: MyContext
+  ):Promise<LoginResponse> {
+    const user = await entityManager.findOne(User, { username, deletedAt: null, });
+    if (!user) throw Error("Invalid credentials");
+    if (!await argon.verify(user.password, password)) throw Error("Invalid credentials");
+    response.cookie(
+      COOKIE_NAME,
+      createRefreshToken(user),
+      {
+        httpOnly: true,
+      }
+    );
+    return {
+      token: createAccessToken(user),
     }
-    if (!user) return null;
-    if (!await argon.verify(user.password, password)) return null;
-    request.session.userId = user.id;
-    return true;
   }
 
   @Mutation(() => User, { nullable: true }) 
@@ -119,4 +120,10 @@ export default class UserResolver{
         resolve(true);
     }));
   }
+}
+
+@ObjectType()
+class LoginResponse {
+  @Field()
+  token: string; 
 }

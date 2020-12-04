@@ -31,10 +31,10 @@ export default class FeedResolver{
     @Arg("pricing") pricing: number,
     @Arg("description") description: string,
     @Arg("departureDate") departureDate: string,
-    @Ctx() { entityManager, request }: MyContext
+    @Ctx() { entityManager, payload }: MyContext
   ){
     const driverFeed = entityManager.create(DriverFeed, {
-      client: request.session.userId,
+      client: payload.userId,
       description,
       initialLocation,
       finalLocation,
@@ -54,12 +54,12 @@ export default class FeedResolver{
     @Arg("pricing", { nullable: true }) pricing: number,
     @Arg("description", { nullable: true }) description: string,
     @Arg("departureDate", { nullable: true }) departureDate: string,
-    @Ctx() { entityManager, request }: MyContext
+    @Ctx() { entityManager, payload }: MyContext
   ): Promise<DriverFeed | null> {
     const driverFeedPost = await entityManager.findOne(DriverFeed, id);
     
     if (!driverFeedPost) return null;
-    if (driverFeedPost.client.id !== request.session.userId) return null;
+    if (driverFeedPost.client.id !== payload.userId) return null;
 
     if (typeof description !== "undefined") driverFeedPost.description = description;
     if (typeof initialLocation !== "undefined") driverFeedPost.initialLocation = initialLocation;
@@ -109,10 +109,10 @@ export default class FeedResolver{
     @Arg("numberOfSeats") numberOfSeats: number,
     @Arg("description") description: string,
     @Arg("departureDate") departureDate: string,
-    @Ctx() { entityManager, request }: MyContext
+    @Ctx() { entityManager, payload }: MyContext
   ): Promise<ClientFeed | null>{
     const clientFeed = entityManager.create(ClientFeed, {
-      driver: request.session.userId,
+      driver: payload.userId,
       description,
       initialLocation,
       finalLocation,
@@ -137,7 +137,7 @@ export default class FeedResolver{
     @Arg("numberOfSeats", { nullable: true }) numberOfSeats: number,
     @Arg("description", { nullable: true }) description: string,
     @Arg("departureDate", { nullable: true }) departureDate: string,
-    @Ctx() { entityManager, request }: MyContext
+    @Ctx() { entityManager, payload }: MyContext
   ): Promise<ClientFeed | null>{
     const clientFeed = await entityManager.findOne(ClientFeed, id);
 
@@ -171,7 +171,7 @@ export default class FeedResolver{
   async createRequest(
     @Arg("feedId") feedId: number,
     @Arg("feedType") feedType: number,
-    @Ctx() { entityManager, request }: MyContext
+    @Ctx() { entityManager, payload }: MyContext
   ): Promise<RequestTable | null>{
     const driverFeed = await entityManager.findOne(DriverFeed, feedId, { fields: ["client"]});
     const clientFeed = await entityManager.findOne(ClientFeed, feedId, { fields: ['driver']});
@@ -186,7 +186,7 @@ export default class FeedResolver{
     }
 
     const requestTable = entityManager.create(RequestTable, {
-      sender: request.session.userId,
+      sender: payload.userId,
       receiver,
       feedType,
       requestStatus: 1,

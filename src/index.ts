@@ -6,17 +6,17 @@ import UserResolver from './resolvers/UserResolver';
 import mikroOrmConfig from './mikro-orm.config';
 import { MikroORM } from '@mikro-orm/core'
 import { AbstractSqlConnection } from '@mikro-orm/mysql';
-import redis from 'redis';
-import session from 'express-session';
-import connectRedis from 'connect-redis';
-import { COOKIE_NAME } from './constants';
 import FeedResolver from './resolvers/FeedResolvers';
 import DriverFeedResolver from './resolvers/DriverFeedResolver';
 import RequestResolver from './resolvers/RequestResolver';
 import { userLoader } from './utils/userLoader';
 import cors from "cors";
 import ClientFeedResolver from './resolvers/ClientFeedResolver';
-
+import cookieParser from 'cookie-parser';
+import { verify } from 'jsonwebtoken';
+import { COOKIE_NAME, REFRESH_TOKEN } from './constants';
+import User from './entities/User';
+import { createAccessToken, createRefreshToken } from './utils/auth';
 
 (async() => {
   const orm = await MikroORM.init(mikroOrmConfig);
@@ -27,31 +27,40 @@ import ClientFeedResolver from './resolvers/ClientFeedResolver';
   
   const app = express();
 
-  const RedisStore = connectRedis(session);
-  const redisClient = redis.createClient();
+  app.use(cookieParser());
+  app.post("/refresh_token", async(req, res) => {
+    const token = req.cookies!.jid;
+    if (!token) {
+      return res.send({ok: false, token: ''});
+    }
+
+    let payload = null;
+    try {
+      payload = verify(token, REFRESH_TOKEN!) as any;
+    } catch (error) {
+      console.log(error);
+      return res.send({ok: false, token: ''});
+    }
+
+    const user = await entityManager.findOne(User, payload.userId);
+    if (!user) return res.send({ok: false, token: ''});
+    
+    res.cookie(
+      COOKIE_NAME,
+      createRefreshToken(user),
+      {
+        httpOnly: true,
+      }
+    );
+
+    return res.send({ok: true, token: createAccessToken(user)});
+  });
+  
   app.set("trust proxy", 1);
   app.use(
     cors({
       origin: process.env.CORS_ORIGIN,
       credentials: true,
-    })
-  );
-
-  app.use(
-    session({
-      name: COOKIE_NAME,
-      store: new RedisStore({ 
-        client: redisClient,
-        disableTouch: true,
-      }),
-      cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-        httpOnly: false,
-        sameSite: 'lax',
-      },
-      saveUninitialized: false,
-      secret: 'super-secret-key',
-      resave: false,  
     })
   );
 
