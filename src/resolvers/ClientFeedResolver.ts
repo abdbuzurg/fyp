@@ -19,7 +19,7 @@ export default class ClientFeedResolver{
 
   @UseMiddleware(isAuth)
   @FieldResolver(() => [RequestTable], { nullable: true })
-  async request(
+  async request( 
     @Root() { request }: ClientFeed,
   ): Promise<RequestTable[] | null> {
     await request.init();

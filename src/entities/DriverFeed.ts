@@ -20,7 +20,7 @@ export default class DriverFeed {
 
   @Field(() => Float)
   @Property()
-  pricing: number;
+  pricing: String
 
   @Field(() => String)
   @Property({ name: "departure_date"})

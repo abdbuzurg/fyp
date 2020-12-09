@@ -11,7 +11,7 @@ export default class FeedResolver{
   @UseMiddleware(isAuth)
   @Query(() => [DriverFeed])
   async fetchDriverFeed(@Ctx() { entityManager }: MyContext): Promise<DriverFeed[] | null> {
-    return await entityManager.find(DriverFeed, {});
+    return (await entityManager.find(DriverFeed, {})).reverse();
   }
 
   @UseMiddleware(isAuth)
@@ -28,7 +28,7 @@ export default class FeedResolver{
   async createDriverFeed(
     @Arg("initialLocation") initialLocation: string,
     @Arg("finalLocation") finalLocation: string,
-    @Arg("pricing") pricing: number,
+    @Arg("pricing") pricing: string,
     @Arg("description") description: string,
     @Arg("departureDate") departureDate: string,
     @Ctx() { entityManager, payload }: MyContext
@@ -51,7 +51,7 @@ export default class FeedResolver{
     @Arg("id") id: number,
     @Arg("initialLocation", { nullable: true }) initialLocation: string,
     @Arg("finalLocation", { nullable: true }) finalLocation: string,
-    @Arg("pricing", { nullable: true }) pricing: number,
+    @Arg("pricing", { nullable: true }) pricing: string,
     @Arg("description", { nullable: true }) description: string,
     @Arg("departureDate", { nullable: true }) departureDate: string,
     @Ctx() { entityManager, payload }: MyContext
@@ -87,7 +87,7 @@ export default class FeedResolver{
   @UseMiddleware(isAuth)
   @Query(() => [ClientFeed])
   async fetchClientFeed(@Ctx() { entityManager }: MyContext): Promise<ClientFeed[] | null>{
-    return await entityManager.find(ClientFeed, {});
+    return (await entityManager.find(ClientFeed, { deletedAt: null })).reverse();
   }
 
   @UseMiddleware(isAuth)
@@ -104,15 +104,16 @@ export default class FeedResolver{
   async createClientFeed(
     @Arg("initialLocation") initialLocation: string,
     @Arg("finalLocation") finalLocation: string,
-    @Arg("pricing") pricing: number,
+    @Arg("pricing") pricing: string,
     @Arg("carModel") carModel: string,
-    @Arg("numberOfSeats") numberOfSeats: number,
+    @Arg("numberOfSeats") numberOfSeats: string,
     @Arg("description") description: string,
     @Arg("departureDate") departureDate: string,
     @Ctx() { entityManager, payload }: MyContext
   ): Promise<ClientFeed | null>{
+    console.log(payload.userId);
     const clientFeed = entityManager.create(ClientFeed, {
-      driver: payload.userId,
+      driver: +payload.userId,
       description,
       initialLocation,
       finalLocation,
@@ -132,9 +133,9 @@ export default class FeedResolver{
     @Arg("id") id: number,
     @Arg("initialLocation", { nullable: true }) initialLocation: string,
     @Arg("finalLocation", { nullable: true }) finalLocation: string,
-    @Arg("pricing", { nullable: true }) pricing: number,
+    @Arg("pricing", { nullable: true }) pricing: string,
     @Arg("carModel", { nullable: true }) carModel: string,
-    @Arg("numberOfSeats", { nullable: true }) numberOfSeats: number,
+    @Arg("numberOfSeats", { nullable: true }) numberOfSeats: string,
     @Arg("description", { nullable: true }) description: string,
     @Arg("departureDate", { nullable: true }) departureDate: string,
     @Ctx() { entityManager, payload }: MyContext
@@ -203,5 +204,16 @@ export default class FeedResolver{
     }
 
     return requestTable;
+  }
+
+  @UseMiddleware(isAuth)
+  @Query(() => [RequestTable])
+  async allRequstOfAClientFeed(
+    @Arg("clientFeedId") clientFeedId: number,
+    @Ctx() { entityManager }:MyContext
+  ): Promise<RequestTable[] | undefined | null> {
+    const clientFeed = await entityManager.findOne(ClientFeed, clientFeedId);
+    await clientFeed?.request.init();
+    return clientFeed?.request.getItems();
   }
 }

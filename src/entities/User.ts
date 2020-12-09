@@ -29,7 +29,6 @@ export default class User {
   @Property()
   username!:string;
 
-  @Field(() => String)
   @Property()
   password!: string;
 

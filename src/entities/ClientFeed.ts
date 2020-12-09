@@ -23,7 +23,7 @@ export default class ClientFeed {
 
   @Field()
   @Property()
-  pricing: number;
+  pricing: String;
 
   @Field()
   @Property({ name: "car_model" })
@@ -31,7 +31,7 @@ export default class ClientFeed {
 
   @Field()
   @Property({ name: "number_of_seats" })
-  numberOfSeats: number;
+  numberOfSeats: String
   
   @Field()
   @Property({ name: "departure_date" })

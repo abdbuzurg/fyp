@@ -1,14 +1,14 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20201203103240 extends Migration {
+export class Migration20201205170707 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table `user` (`id` int unsigned not null auto_increment primary key, `email` varchar(255) not null, `username` varchar(255) not null, `password` varchar(255) not null, `name` varchar(255) not null, `mobile_number` varchar(255) not null, `super_user` tinyint(1) not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');
 
-    this.addSql('create table `driver_feed` (`id` int unsigned not null auto_increment primary key, `initial_location` varchar(255) not null, `final_location` varchar(255) not null, `pricing` int(11) not null, `departure_date` varchar(255) not null, `description` varchar(255) not null, `client_id` int(11) unsigned not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');
+    this.addSql('create table `driver_feed` (`id` int unsigned not null auto_increment primary key, `initial_location` varchar(255) not null, `final_location` varchar(255) not null, `pricing` varchar(255) not null, `departure_date` varchar(255) not null, `description` varchar(255) not null, `client_id` int(11) unsigned not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');
     this.addSql('alter table `driver_feed` add index `driver_feed_client_id_index`(`client_id`);');
 
-    this.addSql('create table `client_feed` (`id` int unsigned not null auto_increment primary key, `driver_id` int(11) unsigned not null, `initial_location` varchar(255) not null, `final_location` varchar(255) not null, `pricing` int(11) not null, `car_model` varchar(255) not null, `number_of_seats` int(11) not null, `departure_date` varchar(255) not null, `description` varchar(255) not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');
+    this.addSql('create table `client_feed` (`id` int unsigned not null auto_increment primary key, `driver_id` int(11) unsigned not null, `initial_location` varchar(255) not null, `final_location` varchar(255) not null, `pricing` varchar(255) not null, `car_model` varchar(255) not null, `number_of_seats` varchar(255) not null, `departure_date` varchar(255) not null, `description` varchar(255) not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');
     this.addSql('alter table `client_feed` add index `client_feed_driver_id_index`(`driver_id`);');
 
     this.addSql('create table `request` (`id` int unsigned not null auto_increment primary key, `sender_id` int(11) unsigned not null, `receiver_id` int(11) unsigned not null, `feed_type` int(11) not null, `request_status` int(11) not null, `response_status` int(11) not null, `created_at` datetime not null, `update_at` datetime not null, `deleted_at` datetime null) default character set utf8mb4 engine = InnoDB;');

@@ -60,6 +60,7 @@ export default class UserResolver{
       }
     );
     return {
+      userId: user.id,
       token: createAccessToken(user),
     }
   }
@@ -126,4 +127,7 @@ export default class UserResolver{
 class LoginResponse {
   @Field()
   token: string; 
+
+  @Field()
+  userId: number;
 }
